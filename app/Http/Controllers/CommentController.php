@@ -9,9 +9,13 @@ use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    public function index(Request $request)
+    public function index(Post $post)
     {
-
+        $comments = Comment::where('post_id', $post->id)->with('user')->orderBy('created_at', 'desc')->get();
+        return response()->json([
+            'status' => 'success',
+            'comments' => $comments
+        ]);
     }
     public function store(CommentRequest $request, Post $post)
     {
@@ -28,7 +32,7 @@ class CommentController extends Controller
         ], 200);
     }
 
-    public function edit(CommentRequest $request, Comment $comment)
+    public function edit(Post $post, Comment $comment, CommentRequest $request)
     {
         $this->authorize('update', $comment);
         $validated = $request->validated();
@@ -40,16 +44,13 @@ class CommentController extends Controller
         ], 200);
     }
 
-    public function delete(Comment $comment)
+    public function delete(Post $post, Comment $comment)
     {
         $this->authorize('delete', $comment);
         $comment->delete();
         return response()->json([
               'message' => 'Comment has been deleted'
           ]);
-
-
-
     }
 
 }

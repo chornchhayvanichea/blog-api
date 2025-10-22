@@ -45,20 +45,23 @@ Route::prefix('auth')->group(function () {
 
 Route::middleware(['auth:api','banned'])->group(function () {
     Route::prefix('posts')->group(function () {
+
         Route::post('/', [PostController::class, 'store']);
         Route::get('/', [PostController::class, 'index']);
-        Route::match(['post','put','patch'], '/{post}', [PostController::class,'update']);
-        Route::post('/{post}', [PostController::class, 'update']);
-        Route::get('/{post}', [PostController::class, 'show']);
-        Route::delete('/{post}', [PostController::class, 'softDelete']);
 
         Route::prefix('{post}/comments')->group(function () {
             Route::get('/', [CommentController::class,'index']);
-            Route::get('/{comment}', [CommentController::class,'show']);
+            //            Route::get('/{comment}', [CommentController::class,'show']);
             Route::post('/', [CommentController::class,'store']);
-            Route::put('/{comment}', [CommentController::class,'update']);
+            Route::patch('/{comment}', [CommentController::class,'edit']);
             Route::delete('/{comment}', [CommentController::class,'delete']);
         });
+
+
+        Route::match(['post','put','patch'], '/{post}', [PostController::class,'update']);
+        Route::get('/{post}', [PostController::class, 'show']);
+        Route::delete('/{post}', [PostController::class, 'softDelete']);
+
     });
 });
 
