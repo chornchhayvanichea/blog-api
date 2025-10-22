@@ -5,6 +5,7 @@ A RESTful API built with Laravel for a blog platform with user authentication, p
 ## Features
 
 ### Authentication
+
 - User registration (signup)
 - User login (JWT-based)
 - Password reset (email token)
@@ -13,6 +14,7 @@ A RESTful API built with Laravel for a blog platform with user authentication, p
 - Logout
 
 ### Posts
+
 - Create, read, update, delete posts
 - Image upload for posts
 - Post categories
@@ -20,14 +22,20 @@ A RESTful API built with Laravel for a blog platform with user authentication, p
 - Admin can restore deleted posts
 
 ### Comments
+
 - Add comments to posts
 - Update and delete own comments
 - View all comments on a post
 
 ### Admin Controls
+
 - Ban/unban users
 - Manage all users' posts
 - Restore deleted posts
+
+### Reports
+
+- Report feature with polymorphic relationships
 
 ## Tech Stack
 
@@ -39,14 +47,16 @@ A RESTful API built with Laravel for a blog platform with user authentication, p
 ## Technical Implementation
 
 ### Security & Authorization
+
 - **Policies**: Role-based access control for posts, comments, and users
-- **Middleware**: 
-  - `auth:api` - JWT authentication
-  - `admin` - Admin-only routes
-  - `banned` - Prevent banned users from accessing resources
+- **Middleware**:
+    - `auth:api` - JWT authentication
+    - `admin` - Admin-only routes
+    - `banned` - Prevent banned users from accessing resources
 - **Form Requests**: Input validation for all create/update operations
 
 ### API Design
+
 - RESTful API architecture
 - JSON responses
 - Proper HTTP status codes

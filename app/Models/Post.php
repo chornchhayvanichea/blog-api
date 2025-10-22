@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Report;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -24,6 +25,10 @@ class Post extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+    public function reports()
+    {
+        return $this->morphMany(Report::class, 'reportable');
     }
 
 }

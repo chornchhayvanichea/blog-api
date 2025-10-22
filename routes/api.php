@@ -3,6 +3,7 @@
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
@@ -48,6 +49,9 @@ Route::middleware(['auth:api','banned'])->group(function () {
 
         Route::post('/', [PostController::class, 'store']);
         Route::get('/', [PostController::class, 'index']);
+        Route::match(['post','put','patch'], '/{post}', [PostController::class,'update']);
+        Route::get('/{post}', [PostController::class, 'show']);
+        Route::delete('/{post}', [PostController::class, 'softDelete']);
 
         Route::prefix('{post}/comments')->group(function () {
             Route::get('/', [CommentController::class,'index']);
@@ -56,16 +60,14 @@ Route::middleware(['auth:api','banned'])->group(function () {
             Route::patch('/{comment}', [CommentController::class,'edit']);
             Route::delete('/{comment}', [CommentController::class,'delete']);
         });
-
-
-        Route::match(['post','put','patch'], '/{post}', [PostController::class,'update']);
-        Route::get('/{post}', [PostController::class, 'show']);
-        Route::delete('/{post}', [PostController::class, 'softDelete']);
-
     });
+
+    Route::post('/reports', [ReportController::class,'storeReport']);
 });
 
 Route::middleware(['auth:api','admin','banned'])->group(function () {
     Route::patch('/users/{user}/ban', [UserManagementController::class,'toggleBan']);
-    Route::patch('/{post}/restore', [PostController::class,'restore']);
+    Route::patch('/posts/{post}/restore', [PostController::class,'restore']);
+
+    Route::get('/reports', [ReportController::class,'index']);
 });
