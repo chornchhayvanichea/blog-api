@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserManagementController;
@@ -62,7 +63,10 @@ Route::middleware(['auth:api','banned'])->group(function () {
         });
     });
 
-    Route::post('/reports', [ReportController::class,'storeReport']);
+    Route::prefix('actions')->group(function () {
+        Route::post('/like/{likeable_type}/{likeable_id}', [LikeController::class,'toggleLike']);
+        Route::post('/report/{reportable_type}/{reportable_id}', [ReportController::class,'storeReport']);
+    });
 });
 
 Route::middleware(['auth:api','admin','banned'])->group(function () {
