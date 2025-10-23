@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Bookmark;
 use App\Models\Report;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -82,5 +83,9 @@ class User extends Authenticatable implements JWTSubject
     public function reports()
     {
         return $this->morphMany(Report::class, 'reportable');
+    }
+    public function bookmark()
+    {
+        return $this->hasMany(Bookmark::class);
     }
 }

@@ -11,7 +11,7 @@ class LikeController extends Controller
 {
     private function getLikableType(string $type, int $id)
     {
-        return $likeableType = match($type) {
+        return match($type) {
             'post' => Post::find($id),
             'comment' => Comment::find($id),
             default => null
@@ -26,7 +26,7 @@ class LikeController extends Controller
 
         $user = auth()->user();
 
-        $like = $likeable->likes()->where('user_id', $user->id)->first();
+        $like = $likeable->likes()->firstWhere('user_id', $user->id);
 
         if ($like) {
             $like->delete();

@@ -20,7 +20,7 @@ class ReportController extends Controller
             default => null
         };
     }
-    public function storeReport(ReportRequest $request, $reportable_type, $reportable_id)
+    public function store(ReportRequest $request, $reportable_type, $reportable_id)
     {
         $reportable = $this->getReportableType($reportable_type, $reportable_id);
         if (!$reportable) {
@@ -52,7 +52,7 @@ class ReportController extends Controller
         return response()->json($reports);
     }
 
-    public function deleteReport(Report $report)
+    public function destroy(Report $report)
     {
         $this->authorize('delete', $report);
         $report->delete();

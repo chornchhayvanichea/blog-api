@@ -80,7 +80,8 @@ class PostController extends Controller
             'message' => 'Post updated successfully'
         ]);
     }
-    public function softDelete(Post $post)
+    //this is delete not destroy btw.
+    public function delete(Post $post)
     {
         $this->authorize('delete', $post);
         $post->delete();

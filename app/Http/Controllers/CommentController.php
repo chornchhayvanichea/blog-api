@@ -32,7 +32,7 @@ class CommentController extends Controller
         ], 200);
     }
 
-    public function edit(Post $post, Comment $comment, CommentRequest $request)
+    public function update(Post $post, Comment $comment, CommentRequest $request)
     {
         $this->authorize('update', $comment);
         $validated = $request->validated();
@@ -44,7 +44,7 @@ class CommentController extends Controller
         ], 200);
     }
 
-    public function delete(Post $post, Comment $comment)
+    public function destroy(Post $post, Comment $comment)
     {
         $this->authorize('delete', $comment);
         $comment->delete();
