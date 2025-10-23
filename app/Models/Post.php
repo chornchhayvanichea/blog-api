@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Like;
 use App\Models\Report;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,6 +30,14 @@ class Post extends Model
     public function reports()
     {
         return $this->morphMany(Report::class, 'reportable');
+    }
+    public function likes()
+    {
+        return $this->morphMany(Like::class, 'likeable');
+    }
+    public function likedBy(User $user)
+    {
+        return $this->likes()->where('user_id', $user->id)->exists();
     }
 
 }

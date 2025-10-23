@@ -11,14 +11,18 @@ use App\Models\Post;
 
 class ReportController extends Controller
 {
-    public function storeReport(ReportRequest $request)
+    private function getReportableType(string $type, int $id)
     {
-        $reportable = match($request->reportable_type) {
-            'post' => Post::find($request->reportable_id),
-            'comment' => Comment::find($request->reportable_id),
-            'user' => User::find($request->reportable_id),
+        return match($type) {
+            'post' => Post::find($id),
+            'comment' => Comment::find($id),
+            'user' => User::find($id),
             default => null
         };
+    }
+    public function storeReport(ReportRequest $request, $reportable_type, $reportable_id)
+    {
+        $reportable = $this->getReportableType($reportable_type, $reportable_id);
         if (!$reportable) {
             return response()->json([
                 'message' => 'Reportable type or id not found'
@@ -33,7 +37,8 @@ class ReportController extends Controller
             'user_id' => auth()->id()
         ]);
         return response()->json([
-           'message' => ucfirst($request->reportable_type) . " has been reported successfully",            'report' => $report
+            'message' => ucfirst($request->reportable_type) . " has been reported successfully",
+            'report' => $report
         ]);
     }
 
