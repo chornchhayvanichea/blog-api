@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
@@ -32,6 +33,7 @@ use Illuminate\Support\Facades\Route;
 #    ]);
 #});
 #
+
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class,'login']);
     Route::post('/signup', [AuthController::class,'signup']);
@@ -52,20 +54,25 @@ Route::middleware(['auth:api','banned'])->group(function () {
         Route::get('/', [PostController::class, 'index']);
         Route::match(['post','put','patch'], '/{post}', [PostController::class,'update']);
         Route::get('/{post}', [PostController::class, 'show']);
-        Route::delete('/{post}', [PostController::class, 'softDelete']);
+        Route::delete('/{post}', [PostController::class, 'delete']);
 
         Route::prefix('{post}/comments')->group(function () {
             Route::get('/', [CommentController::class,'index']);
             //            Route::get('/{comment}', [CommentController::class,'show']);
             Route::post('/', [CommentController::class,'store']);
-            Route::patch('/{comment}', [CommentController::class,'edit']);
-            Route::delete('/{comment}', [CommentController::class,'delete']);
+            Route::patch('/{comment}', [CommentController::class,'update']);
+            Route::delete('/{comment}', [CommentController::class,'destroy']);
         });
     });
 
     Route::prefix('actions')->group(function () {
         Route::post('/like/{likeable_type}/{likeable_id}', [LikeController::class,'toggleLike']);
-        Route::post('/report/{reportable_type}/{reportable_id}', [ReportController::class,'storeReport']);
+        Route::post('/report/{reportable_type}/{reportable_id}', [ReportController::class,'store']);
+
+        Route::prefix('/bookmarks')->group(function () {
+            Route::post('/{post_id}/toggle', [BookmarkController::class,'toggleBookmark']);
+            Route::get('/', [BookmarkController::class,'index']);
+        });
     });
 });
 

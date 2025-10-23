@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Bookmark;
 use App\Models\Like;
 use App\Models\Report;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -38,6 +39,10 @@ class Post extends Model
     public function likedBy(User $user)
     {
         return $this->likes()->where('user_id', $user->id)->exists();
+    }
+    public function bookmark()
+    {
+        return $this->hasMany(Bookmark::class);
     }
 
 }
