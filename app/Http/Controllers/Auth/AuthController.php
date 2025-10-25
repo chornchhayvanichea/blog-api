@@ -11,6 +11,7 @@ use App\Http\Requests\AuthRequests\LoginRequest;
 use App\Http\Requests\AuthRequests\ChangePasswordRequest;
 use App\Http\Requests\AuthRequests\ResetPasswordRequest;
 use App\Services\PasswordService;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -60,6 +61,7 @@ class AuthController extends Controller
             'user' => $user->load('profile')
         ], 201);
     }
+
     public function logout()
     {
         auth('api')->logout();
@@ -115,5 +117,6 @@ class AuthController extends Controller
             ], $e->getCode() ?: 400);
         }
     }
+
 
 }

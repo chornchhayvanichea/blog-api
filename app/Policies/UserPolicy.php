@@ -11,4 +11,8 @@ class UserPolicy
     {
         return $authUser->role === 'admin';
     }
+    public function index(User $User)
+    {
+        return $User->role === 'admin';
+    }
 }

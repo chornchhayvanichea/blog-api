@@ -48,6 +48,9 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::middleware(['auth:api','banned'])->group(function () {
+    Route::prefix('user')->group(function () {
+        Route::get('me', [UserManagementController::class,'me']);
+    });
     Route::prefix('posts')->group(function () {
 
         Route::post('/', [PostController::class, 'store']);
@@ -76,9 +79,12 @@ Route::middleware(['auth:api','banned'])->group(function () {
     });
 });
 
-Route::middleware(['auth:api','admin','banned'])->group(function () {
+Route::middleware(['auth:api','admin','banned'])->prefix('admin')->group(function () {
     Route::patch('/users/{user}/ban', [UserManagementController::class,'toggleBan']);
     Route::patch('/posts/{post}/restore', [PostController::class,'restore']);
 
+    Route::get('/users', [UserManagementController::class,'index']);
     Route::get('/reports', [ReportController::class,'index']);
+
+
 });
