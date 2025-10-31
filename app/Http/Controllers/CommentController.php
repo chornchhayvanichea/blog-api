@@ -2,55 +2,54 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CommentRequest;
+use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Post;
-use App\Http\Requests\CommentRequest;
-use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
     public function index(Post $post)
     {
-        $comments = Comment::where('post_id', $post->id)->with('user')->orderBy('created_at', 'desc')->get();
-        return response()->json([
-            'status' => 'success',
-            'comments' => $comments
-        ]);
+        $comments = Comment::where('post_id', $post->id)
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return $this->sendResponse([
+            'comments' => CommentResource::collection($comments),
+        ], 'Comments retrieved successfully');
     }
+
     public function store(CommentRequest $request, Post $post)
     {
         $validated = $request->validated();
         $comment = $post->comments()->create([
             'user_id' => auth()->id(),
-            'content' => $validated['content']
+            'content' => $validated['content'],
         ]);
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Comment created successfully',
-            'comment' => $comment->load('post')
-        ], 200);
+        return $this->sendResponse([
+            'comment' => new CommentResource($comment->load('user'))
+        ], 'comment created successfully');
     }
 
-    public function edit(Post $post, Comment $comment, CommentRequest $request)
+    public function update(Post $post, Comment $comment, CommentRequest $request)
     {
         $this->authorize('update', $comment);
         $validated = $request->validated();
         $comment->update($validated);
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Comment created successfully',
-            'comment' => $comment->load('post')
-        ], 200);
+
+        return $this->sendResponse([
+            'comment' => new CommentResource($comment->load('user'))
+        ], 'comment updated successfully');
     }
 
-    public function delete(Post $post, Comment $comment)
+    public function destroy(Post $post, Comment $comment)
     {
         $this->authorize('delete', $comment);
         $comment->delete();
-        return response()->json([
-              'message' => 'Comment has been deleted'
-          ]);
-    }
 
+        return $this->sendResponse([], 'comment deleted');
+    }
 }

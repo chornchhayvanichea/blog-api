@@ -15,7 +15,9 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
      * Create a new notification instance.
      */
     public $token;
+
     public $email;
+
     public function __construct($token, $email)
     {
         $this->token = $token;
@@ -35,13 +37,12 @@ class ResetPasswordNotification extends Notification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      */
-
     public function toMail($notifiable)
     {
         // Change this URL to your frontend reset password page
-        $url = config('app.frontend_url') . '/reset-password?token=' . $this->token . '&email=' . urlencode($this->email);
+        $url = config('app.frontend_url').'/reset-password?token='.$this->token.'&email='.urlencode($this->email);
 
-        return (new MailMessage())
+        return (new MailMessage)
             ->subject('Reset Password Notification')
             ->line('You are receiving this email because we received a password reset request for your account.')
             ->action('Reset Password', $url)

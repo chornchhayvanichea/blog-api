@@ -2,14 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\Report;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
-use App\Notifications\ResetPasswordNotification;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -27,20 +26,22 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'role',
-        'is_banned'
+        'is_banned',
     ];
 
     /**
-        * Send the password reset notification.
-        */
+     * Send the password reset notification.
+     */
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordNotification($token, $this->email));
     }
+
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
+
     public function getJWTCustomClaims()
     {
         return [];
@@ -71,16 +72,28 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasOne(Profile::class);
     }
+
     public function posts()
     {
         return $this->hasMany(Post::class);
     }
+
     public function comments()
     {
         return $this->hasMany(Comment::class);
     }
+
     public function reports()
     {
         return $this->morphMany(Report::class, 'reportable');
+    }
+
+    public function bookmark()
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+    public function viewedPosts()
+    {
+        return $this->belongsToMany(Post::class, 'post_user_views');
     }
 }

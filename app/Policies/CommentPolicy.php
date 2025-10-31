@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Comment;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class CommentPolicy
 {
@@ -40,6 +39,7 @@ class CommentPolicy
         if ($user->role === 'admin') {
             return true;
         }
+
         return $user->id === $comment->user_id;
     }
 
@@ -51,6 +51,7 @@ class CommentPolicy
         if ($user->role === 'admin') {
             return true;
         }
+
         return $user->id === $comment->user_id;
     }
 

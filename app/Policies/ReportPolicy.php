@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Report;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ReportPolicy
 {
@@ -12,6 +11,7 @@ class ReportPolicy
     {
         return $user->role === 'admin';
     }
+
     public function delete(User $user, Report $report)
     {
         return $user->role === 'admin';

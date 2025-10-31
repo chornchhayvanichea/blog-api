@@ -2,41 +2,49 @@
 
 namespace App\Http\Controllers\Auth;
 
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AuthRequests\ForgotPasswordRequest;
-use App\Http\Requests\AuthRequests\SignupRequest;
-use App\Http\Requests\AuthRequests\LoginRequest;
 use App\Http\Requests\AuthRequests\ChangePasswordRequest;
+use App\Http\Requests\AuthRequests\ForgotPasswordRequest;
+use App\Http\Requests\AuthRequests\LoginRequest;
 use App\Http\Requests\AuthRequests\ResetPasswordRequest;
+use App\Http\Requests\AuthRequests\SignupRequest;
+use App\Http\Resources\UserResource;
+use App\Models\User;
 use App\Services\PasswordService;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
     private $passwordService;
+
     public function __construct(PasswordService $passwordService)
     {
         $this->passwordService = $passwordService;
-        $this->middleware('auth:api', ['except' => ['login','signup','changePassword','forgotPassword','resetPassword']]);
+        $this->middleware('auth:api', ['except' => [
+             'login',
+             'signup',
+             'changePassword',
+             'forgotPassword',
+             'resetPassword'
+         ]
+        ]);
     }
 
     public function login(LoginRequest $request)
     {
-        $token = auth('api')->attempt($request->validated());
+        $credentials = $request->validated();
 
-        if (!$token) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => 'Invalid credentials provided'
-            ], 401);
+        $token = auth('api')->attempt($credentials);
+
+        if (! $token) {
+            return $this->sendError('Unauthorized', [], 401);
         }
 
-        return response()->json([
+        return $this->sendResponse([
+            'user' => new UserResource(auth()->user()),
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'status' => 'success',
-        ], 200);
+        ], 'Login successful');
     }
 
     public function signup(SignupRequest $request)
@@ -45,48 +53,45 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'password' => Hash::make($validated['password']),
-            'email' => $validated['email']
+            'email' => $validated['email'],
         ]);
         $profileData = [
-            'bio' => $validated['bio'] ?? null
+            'bio' => $validated['bio'] ?? null,
         ];
         if ($request->hasFile('avatar')) {
             $profileData['avatar'] = $request->file('avatar')->store('profiles', 'public');
         }
         $user->profile()->create($profileData);
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User has been created successfully',
-            'user' => $user->load('profile')
-        ], 201);
+        return $this->sendResponse([
+            'user' => $user,
+        ], 'User signed up Successfully');
     }
+
     public function logout()
     {
         auth('api')->logout();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Successfully logged out'
-        ]);
+        return $this->sendResponse([], 'User has logged out Successfully');
     }
 
     public function refreshToken()
     {
-        return response()->json([
-            'access_token' => auth('api')->refresh(),
+        $token = auth('api')->refresh();
+
+        return $this->sendResponse([
+            'access_token' => $token,
             'token_type' => 'Bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
-        ]);
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
+        ], 'Token refreshed successfully');
     }
+
     public function changePassword(ChangePasswordRequest $request)
     {
         try {
             $result = $this->passwordService->changePassword($request);
-            return response()->json($result, 200);
+
+            return $this->sendResponse($result, 'Password changed successfully');
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => $e->getMessage()
-            ], $e->getCode() ?: 400);
+            return $this->sendError($e->getMessage(), [], $e->getCode() ?: 400);
         }
     }
 
@@ -94,12 +99,10 @@ class AuthController extends Controller
     {
         try {
             $result = $this->passwordService->sendResetLink($request->email);
-            return response()->json($result, 200);
+
+            return $this->sendResponse($result, 'Password reset link sent successfully');
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => $e->getMessage()
-            ], $e->getCode() ?: 400);
+            return $this->sendError($e->getMessage(), [], $e->getCode() ?: 400);
         }
     }
 
@@ -107,13 +110,10 @@ class AuthController extends Controller
     {
         try {
             $result = $this->passwordService->resetPassword($request->validated());
-            return response()->json($result, 200);
+
+            return $this->sendResponse($result, 'Password has been reset successfully');
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'failed',
-                'message' => $e->getMessage()
-            ], $e->getCode() ?: 400);
+            return $this->sendError($e->getMessage(), [], $e->getCode() ?: 400);
         }
     }
-
 }

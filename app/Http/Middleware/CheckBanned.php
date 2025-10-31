@@ -19,9 +19,10 @@ class CheckBanned
         if ($user && $user->is_banned) {
             return response()->json([
                 'statue' => 'error',
-                'message' => 'Your account is banned'
+                'message' => 'Your account is banned',
             ]);
         }
+
         return $next($request);
     }
 }

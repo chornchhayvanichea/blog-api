@@ -37,6 +37,14 @@ A RESTful API built with Laravel for a blog platform with user authentication, p
 
 - Report feature with polymorphic relationships
 
+### Likes
+
+- Like feature for Comment and Post
+
+### Bookmark
+
+- Bookmark allows user to save posts
+
 ## Tech Stack
 
 - **Framework**: Laravel 10.x

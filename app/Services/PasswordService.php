@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Http\Requests\AuthRequests\ChangePasswordRequest;
+use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 
@@ -17,18 +17,18 @@ class PasswordService
     public function changePassword(ChangePasswordRequest $request)
     {
         // Validate current password
-        if (!$this->validateCurrentPassword($request->current_password)) {
+        if (! $this->validateCurrentPassword($request->current_password)) {
             throw new \Exception('Current password is incorrect', 401);
         }
 
         // Update password
         auth()->user()->update([
-            'password' => Hash::make($request->new_password)
+            'password' => Hash::make($request->new_password),
         ]);
 
         return [
             'status' => 'success',
-            'message' => 'Password changed successfully'
+            'message' => 'Password changed successfully',
         ];
     }
 
@@ -41,7 +41,7 @@ class PasswordService
 
         return [
             'status' => 'success',
-            'message' => 'Password reset link sent to your email'
+            'message' => 'Password reset link sent to your email',
         ];
     }
 
@@ -60,7 +60,7 @@ class PasswordService
 
         return [
             'status' => 'success',
-            'message' => 'Password reset successfully'
+            'message' => 'Password reset successfully',
         ];
     }
 }

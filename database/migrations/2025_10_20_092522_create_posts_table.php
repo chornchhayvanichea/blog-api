@@ -17,7 +17,7 @@ return new class () extends Migration {
             $table->string('title');
             $table->string('slug')->unique();
             $table->string('image')->nullable();
-            $table->enum('status', ['draft','published'])->default('draft');
+            $table->enum('status', ['draft', 'published'])->default('draft');
             $table->timestamps();
             $table->softDeletes();
         });

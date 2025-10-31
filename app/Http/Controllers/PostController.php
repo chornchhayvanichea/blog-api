@@ -2,46 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Str;
 use App\Http\Requests\PostRequests\CreatePostRequest;
 use App\Http\Requests\PostRequests\UpdatePostRequest;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Post::query()->with('user');
 
-        // Default: only show published posts
-        $query->where('status', 'published');
+        $query = Post::query()->with(['user','viewers']);
 
-        // Optional: if user wants to see their own posts, include drafts
-        if ($request->has('mine') && $request->query('mine') == 1) {
-            $query->orWhere('user_id', auth()->id());
+        if ($request->boolean('mine')) {
+            // show all posts for current user (draft + published)
+            $query->where('user_id', auth()->id());
+        } else {
+            // show only published posts
+            $query->where('status', 'published');
         }
 
         $query->orderBy('created_at', 'desc');
-
         $posts = $query->paginate(10);
 
-        return response()->json([
-            'posts' => $posts->items(),
-            'total' => $posts->total(),
-            'per_page' => $posts->perPage(),
-            'current_page' => $posts->currentPage(),
-            'last_page' => $posts->lastPage()
-        ]);
-    }
-    public function show(Post $post)
-    {
-        return response()->json([
-            'post' => $post
-        ]);
+        return $this->sendResponse([
+            'posts' => PostResource::collection($posts),
+            'pagination' => [
+                'current_page' => $posts->currentPage(),
+                'last_page' => $posts->lastPage(),
+                'per_page' => $posts->perPage(),
+                'total' => $posts->total(),
+            ]
+        ], 'Posts retrieved successfully');
     }
 
+    public function show(Post $post)
+    {
+        $post->load(['user','likes','viewers']);
+        return $this->sendResponse([
+            'post' => new PostResource($post),
+        ], 'Post retrieved successfully');
+    }
 
     public function store(CreatePostRequest $request)
     {
@@ -53,12 +57,12 @@ class PostController extends Controller
         $post = Post::create([
             ...$validated,
             'user_id' => auth()->id(),
-            'slug' => Str::slug($validated['title']) . '-' . now()->format('YmdHis')
+            'slug' => Str::slug($validated['title']) . '-' . now()->format('YmdHis'),
         ]);
-        return response()->json([
-            'status' => 'success',
-            'post' => $post
-        ]);
+
+        return $this->sendResponse([
+            'post' => new PostResource($post)
+        ], 'Post has been created successfully');
     }
 
     public function update(UpdatePostRequest $request, Post $post)
@@ -74,33 +78,41 @@ class PostController extends Controller
         }
 
         $post->update($validated);
-        return response()->json([
-            'status' => 'success',
-            'post' => $post,
-            'message' => 'Post updated successfully'
-        ]);
+        $post->refresh();
+        return $this->sendResponse([
+            'post' => new PostResource($post)
+        ], 'Post has been updated successfully');
     }
-    public function softDelete(Post $post)
+
+    // this is delete not destroy btw.
+    public function delete(Post $post)
     {
+
         $this->authorize('delete', $post);
         $post->delete();
         $trashed = Post::onlyTrashed()->get();
-        return response()->json([
-            'message' => 'Post deleted successfully',
-            'trash_bin' => $trashed
-        ]);
+
+        return $this->sendResponse([], 'Post has been deleted successfully');
     }
+
     public function restore($id)
     {
         $post = Post::onlyTrashed()->findOrFail($id);
         $this->authorize('restore', $post);
         $post->restore();
 
-        return response()->json([
-            'status' => 'success',
-            'mesage' => 'Post restore successfully',
-            'post' => $post
-        ]);
+        return $this->sendResponse([
+            'post' => new PostResource($post)
+        ], 'Post restored successfully');
     }
+    public function viewIncrement(Post $post)
+    {
+        if (auth()->check()) {
+            $post->viewers()->syncWithoutDetaching([auth()->id()]);
+        }
 
+        return $this->sendResponse([
+            'views' => $post->viewers()->count(),
+        ], null);
+    }
 }

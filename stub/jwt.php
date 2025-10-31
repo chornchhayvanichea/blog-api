@@ -3,10 +3,7 @@
 namespace PHPOpenSourceSaver\JWTAuth\Facades;
 
 /**
-* @method Static string refresh()
-* @method static \PHPOpenSourceSaver\JWTAuth\JWTAuth factory()
-*/
-
-class JWTAuth
-{
-}
+ * @method static string refresh()
+ * @method static \PHPOpenSourceSaver\JWTAuth\JWTAuth factory()
+ */
+class JWTAuth {}

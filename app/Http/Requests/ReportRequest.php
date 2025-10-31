@@ -22,7 +22,7 @@ class ReportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'reason' => ['string','required','min:15','max:255'],
+            'reason' => ['string', 'required', 'min:15', 'max:255'],
         ];
     }
 }
