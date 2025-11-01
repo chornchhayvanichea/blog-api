@@ -37,9 +37,14 @@ class ReportController extends Controller
             'user_id' => auth()->id(),
         ]);
 
-        return $this->sendResponse([
-            'report' => new ReportResource($report)
-        ], ucfirst($report->reportable_type) . 'has been reported successfully', 200);
+
+        return $this->sendResponse(
+            [
+                'report' => new ReportResource($report)
+            ],
+            class_basename($report->reportable_type) . ' has been reported successfully',
+            200
+        );
     }
 
     public function index(Report $report)

@@ -15,7 +15,7 @@ class PostController extends Controller
     public function index(Request $request)
     {
 
-        $query = Post::query()->with(['user','viewers']);
+        $query = Post::query()->with(['user','viewers','bookmark']);
 
         if ($request->boolean('mine')) {
             // show all posts for current user (draft + published)

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\LikeResource;
 use App\Models\Comment;
+use App\Models\Like;
 use App\Models\Post;
 
 class LikeController extends Controller
@@ -35,10 +37,16 @@ class LikeController extends Controller
             $liked = true;
         }
 
-
         return $this->sendResponse([
             'liked' => $liked,
             'likes_count' => $likeable->likes()->count(),
         ], $liked ? 'Post liked' : 'Post unliked');
+    }
+    public function index()
+    {
+        $likes = Like::with(['user','likeable'])->get();
+        return $this->sendResponse([
+            'likes' => LikeResource::collection($likes),
+        ], "likes list");
     }
 }

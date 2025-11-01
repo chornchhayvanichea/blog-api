@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Profile;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Notifications\ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,6 +10,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
+use App\Models\Post;
+use View;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -96,4 +99,17 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(Post::class, 'post_user_views');
     }
+
+    public function receivedLikes()
+    {
+        return $this->hasManyThrough(
+            Like::class,    // final model
+            Post::class,    // intermediate model
+            'user_id',      // FK on posts table pointing to user
+            'likeable_id',  // FK on likes table pointing to likeable
+            'id',           // local key on users table
+            'id'            // local key on posts table
+        )->where('likeable_type', Post::class);
+    }
+
 }

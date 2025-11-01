@@ -2,12 +2,12 @@
 
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\BookmarkController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserManagementController;
-use App\Models\Post;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/debug-post/{post}', function (Post $post) {
@@ -35,6 +35,7 @@ use Illuminate\Support\Facades\Route;
 // });
 //
 
+Route::get('/users', [AuthController::class,'index']);
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/signup', [AuthController::class, 'signup']);
@@ -42,15 +43,19 @@ Route::prefix('auth')->group(function () {
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
     Route::middleware(['auth:api', 'banned'])->group(function () {
+        //        Route::get('/me', [AuthController::class,'me']);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh-token', [AuthController::class, 'refreshToken']);
         Route::post('/change-password', [AuthController::class, 'changePassword']);
     });
 });
 
+
 Route::middleware(['auth:api', 'banned'])->group(function () {
     Route::prefix('user')->group(function () {
         Route::get('/mypost', [PostController::class,'myPost']);
+        Route::get('/', [AuthController::class,'show']);
+        Route::post('/{user}', [AuthController::class,'update']);
     });
     Route::prefix('posts')->group(function () {
 
@@ -69,8 +74,12 @@ Route::middleware(['auth:api', 'banned'])->group(function () {
         });
     });
 
+    Route::get('/categories', [CategoryController::class,'index']);
     Route::prefix('actions')->group(function () {
-        Route::post('/like/{likeable_type}/{likeable_id}', [LikeController::class, 'toggleLike']);
+        Route::prefix('/like')->group(function () {
+            Route::post('/{likeable_type}/{likeable_id}', [LikeController::class, 'toggleLike']);
+            Route::get('/', [LikeController::class,'index']);
+        });
         Route::post('/report/{reportable_type}/{reportable_id}', [ReportController::class, 'store']);
         Route::post('/view/{post}', [PostController::class,'viewIncrement']);
 
@@ -81,9 +90,10 @@ Route::middleware(['auth:api', 'banned'])->group(function () {
     });
 });
 
-Route::middleware(['auth:api', 'admin', 'banned'])->group(function () {
+Route::middleware(['auth:api', 'admin', 'banned'])->prefix('admin')->group(function () {
     Route::patch('/users/{user}/ban', [UserManagementController::class, 'toggleBan']);
     Route::patch('/posts/{post}/restore', [PostController::class, 'restore']);
 
     Route::get('/reports', [ReportController::class, 'index']);
+    Route::get('/users', [AuthController::class,'index']);
 });

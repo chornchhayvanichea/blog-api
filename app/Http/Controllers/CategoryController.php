@@ -9,9 +9,10 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::with('categories')->withCount('posts')->get();
+        $categories = Category::withCount('posts')->get();
+
         return $this->sendResponse([
-            'categories' => CategoryResource::collection($categories)
+            'categories' => CategoryResource::collection($categories),
         ], 'Categories retrieved successfully');
     }
 }

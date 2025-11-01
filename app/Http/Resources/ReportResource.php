@@ -12,16 +12,24 @@ class ReportResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toArray($request)
     {
         return [
             'id' => $this->id,
-            'user' => new UserResource($this->whenLoaded('user')),
             'reason' => $this->reason,
             'reportable_type' => $this->reportable_type,
             'reportable_id' => $this->reportable_id,
-            'reportable' => $this->whenLoaded('reportable'),
+            'reportable' => $this->reportable,
+            'reporter' => [
+                'id' => $this->reporter->id,
+                'name' => $this->reporter->name,
+                'email' => $this->reporter->email,
+                'avatar' => $this->reporter->profile?->avatar, // GET AVATAR FROM PROFILE
+                'profile' => $this->reporter->profile, // OR include full profile
+            ],
             'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'status' => $this->status ?? 'pending',
         ];
     }
 }

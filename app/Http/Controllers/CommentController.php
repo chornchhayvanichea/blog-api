@@ -12,7 +12,7 @@ class CommentController extends Controller
     public function index(Post $post)
     {
         $comments = Comment::where('post_id', $post->id)
-            ->with('user')
+            ->with('user.profile') // <-- load profile here
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -20,6 +20,7 @@ class CommentController extends Controller
             'comments' => CommentResource::collection($comments),
         ], 'Comments retrieved successfully');
     }
+
 
     public function store(CommentRequest $request, Post $post)
     {
@@ -29,6 +30,7 @@ class CommentController extends Controller
             'content' => $validated['content'],
         ]);
 
+        $comment->load('user.profile');
         return $this->sendResponse([
             'comment' => new CommentResource($comment->load('user'))
         ], 'comment created successfully');
